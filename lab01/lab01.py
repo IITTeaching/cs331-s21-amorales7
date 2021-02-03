@@ -22,7 +22,19 @@ def captured_output():
 
 # implement this function
 def is_perfect(n):
-    pass
+    divisors = []
+    sum = 0
+    for x in range(1, n):
+        if(n % x == 0):
+            divisors.append(x)
+    #print(divisors)
+    for x in divisors:
+        sum = sum + x
+
+    if sum == n:
+        return True
+    else:
+        return False
 
 # (3 points)
 def test1():
@@ -40,7 +52,21 @@ def test1():
 
 # implement this function
 def multiples_of_3_and_5(n):
-    pass
+    multiple = []
+    sum = 0
+    for x in range(1,n):
+        if(3*x < n):
+            multiple.append(3*x)
+        if(5*x < n):
+            multiple.append(5*x)
+    for x in multiple:
+        multiple.count(x)
+        if(multiple.count(x) > 1):
+            multiple.remove(x)
+    for x in multiple:
+        sum = sum + x
+    #print(sum)
+    return sum
 
 # (3 points)
 def test2():
@@ -53,7 +79,27 @@ def test2():
 # EXERCISE 3
 #################################################################################
 def integer_right_triangles(p):
-    pass
+    sides = []
+    uniqueTriangles = 0
+    for x in range(1, p):
+        a = x
+        if a > p*0.75:
+            break
+        for y in range(1,p):
+            b = y
+            c = p-(a+b)
+            if (a**2 + b**2 == c **2 and a+b+c == p):
+                sides.append(a)
+                sides.append(b)
+                sides.append(c)
+    for x in range(1,p):
+        sides.count(x)
+        if(sides.count(x) > 1):
+            sides.remove(x)
+    uniqueTriangles = len(sides)/3
+    #print("Unique Triangles Found:")
+    #print(uniqueTriangles)
+    return uniqueTriangles
 
 def test3():
     tc = unittest.TestCase()
@@ -67,7 +113,34 @@ def test3():
 
 # implement this function
 def gen_pattern(chars):
-    pass
+    patternChar = []
+    currentString = ''
+    reverseString = ''
+    finalString = ''
+    patternChar.extend(chars)
+    length = len(patternChar)
+    for i in range(0, length):
+        reverseString = ''
+        currentString = ''
+        for x in range(length-1, -i+(length-2), -1):
+            reverseString += patternChar[x]
+        for y in range(length, -i+(length-1), -1):
+            currentString = ''.join(patternChar[y:length])
+        reverseString += currentString
+        finalString = (f"{'.'.join(reverseString).center(length+(length-1)+(2*(length-1)), '.')}")
+        print(finalString)
+    for l in range(1, length):
+        reverseString = ''
+        currentString = ''
+        for x in range(length-1, l-1, -1):
+            reverseString += patternChar[x]
+        for y in range(l+1, length):
+            currentString += patternChar[y]
+        reverseString += currentString
+        finalString = (f"{'.'.join(reverseString).center(length+(length-1)+(2*(length-1)), '.')}")
+        print(finalString)
+    #return finalString
+
 
 def test4():
     tc = unittest.TestCase()
@@ -152,6 +225,7 @@ def main():
     test2()
     test3()
     test4()
+    #print(gen_pattern('FINALLY'))
 
 if __name__ == '__main__':
     main()
