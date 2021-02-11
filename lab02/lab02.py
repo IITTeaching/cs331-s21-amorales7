@@ -34,7 +34,34 @@ ROMEO_SOLILOQUY = """
 # Implement this function
 def compute_ngrams(toks, n=2):
     """Returns an n-gram dictionary based on the provided list of tokens."""
-    pass
+    tokens = toks
+    nGramList = []
+    nGrams = {}
+    for word in range(0,len(tokens)):
+        nGram = tokens[word: word+n]
+        if (len(nGram) == n):
+            nGramList.append(tuple(nGram))
+    #print(f"NGramList:{nGramList}")
+    #nGrams = {nGramList[nGram][0]: (nGramList[nGram][1:n]) for nGram in range(0,len(nGramList))}
+
+    for nGram in range(0,len(nGramList)):
+        nGrams.setdefault(nGramList[nGram][0], []).append(nGramList[nGram][1:n])
+    #print(f"nGrams: {nGrams}")
+    #for nGram in range(0,len(nGramList)):
+        #nGrams[nGramList[nGram][0]].append(nGramList[nGram][1:n])
+        #print(f"nGrams index: {nGramList[nGram].count('really')}")
+
+    #keys = nGrams.keys()
+    #values = nGrams.values()
+    #print(keys)
+    #print(values)
+    #for key in nGrams.keys():
+        #del nGrams[key][0:n-1]
+        #print(f"values: {nGrams[key]}")
+        #nGrams[key] = tuple(nGrams[key])
+    #print("SHOULD BE PRINTING N GRAMS")
+    #print(f"nGrams: {nGrams}")
+    return nGrams
 
 def test1():
     test1_1()
@@ -93,7 +120,28 @@ def test1_2():
 ################################################################################
 # Implement this function
 def gen_passage(ngram_dict, length=100):
-    pass
+    startToken = random.choice(sorted(ngram_dict.keys()))
+    passage = startToken
+    currentToken = startToken
+    #print(f"Dictionary: {ngram_dict}")
+    #print(f"Start Token: {startToken}")
+    #print(f"Current Token: {currentToken}")
+    #print(f"Passage: {passage}")
+    for x in range(0, length-1):
+        if currentToken in ngram_dict:
+            #print(f"{currentToken} is a key")
+            newCurrentToken = ''.join(random.choice(ngram_dict[currentToken]))
+            #print(f"New Current Token: {newCurrentToken}")
+            #print(f"Current Token: {currentToken}")
+            passage += ' ' + newCurrentToken
+            currentToken = newCurrentToken
+            #print(f"Current Token end of loop: {currentToken}")
+        else:
+            #print(f"{currentToken} is NOT a key")
+            currentToken = random.choice(sorted(ngram_dict.keys()))
+            passage += ' ' + currentToken
+    #print(f"Passage: {passage}")
+    return passage
 
 # 50 Points
 def test2():
