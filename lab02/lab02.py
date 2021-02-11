@@ -123,24 +123,25 @@ def gen_passage(ngram_dict, length=100):
     startToken = random.choice(sorted(ngram_dict.keys()))
     passage = startToken
     currentToken = startToken
-    print(f"Dictionary: {ngram_dict}")
-    print(f"Start Token: {startToken}")
-    print(f"Current Token: {currentToken}")
-    print(f"Passage: {passage}")
+    #print(f"Dictionary: {ngram_dict}")
+    #print(f"Start Token: {startToken}")
+    #print(f"Current Token: {currentToken}")
+    #print(f"Passage: {passage}")
     for x in range(0, length-1):
         if currentToken in ngram_dict:
-            print(f"{currentToken} is a key")
-            currentToken = random.choice(ngram_dict[currentToken])
-            print(f"Last Token: {currentToken}")
-            #passage += ' ' + currentToken
-            lastToken = currentToken
-            print(f"Current Token: {currentToken}")
+            #print(f"{currentToken} is a key")
+            newCurrentToken = ''.join(random.choice(ngram_dict[currentToken]))
+            #print(f"New Current Token: {newCurrentToken}")
+            #print(f"Current Token: {currentToken}")
+            passage += ' ' + newCurrentToken
+            currentToken = newCurrentToken
+            #print(f"Current Token end of loop: {currentToken}")
         else:
-            print(f"{currentToken} is NOT a key")
+            #print(f"{currentToken} is NOT a key")
             currentToken = random.choice(sorted(ngram_dict.keys()))
             passage += ' ' + currentToken
-    print(f"Passage: {passage}")
-    pass
+    #print(f"Passage: {passage}")
+    return passage
 
 # 50 Points
 def test2():
@@ -157,7 +158,7 @@ def test2():
                    'too bold, \'tis not night. see, how she leans her')
 
 def main():
-    #test1()
+    test1()
     test2()
 
 if __name__ == '__main__':
