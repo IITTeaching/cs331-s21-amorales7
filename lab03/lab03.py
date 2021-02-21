@@ -9,6 +9,18 @@ S = TypeVar('S')
 # EXERCISE 1
 #################################################################################
 def mysort(lst: List[T], compare: Callable[[T, T], int]) -> List[T]:
+    cmp = compare
+    for i in range(1, len(lst)):
+        for j in range(i, 0, -1):
+            if cmp(lst[j],lst[j-1]) == -1:
+                temp = lst[j-1]
+                lst[j-1] = lst[j]
+                lst[j] = temp
+                #print(f"Last Character: {lst[j][-1]}")
+            else:
+                break
+
+    return lst
     """
     This method should sort input list lst of elements of some type T.
 
@@ -20,6 +32,25 @@ def mysort(lst: List[T], compare: Callable[[T, T], int]) -> List[T]:
     pass
 
 def mybinsearch(lst: List[T], elem: S, compare: Callable[[T, S], int]) -> int:
+    startIndex = 0
+    endIndex = len(lst)-1
+    cmp = compare
+    #print(lst)
+    #print(f"Looking for this element {elem}")
+
+    while startIndex <= endIndex:
+        midpoint = startIndex + (endIndex-startIndex)//2
+        midpointValue = lst[midpoint]
+        #print(f"Midpoint: {midpoint}")
+        #print(f"Midpoint Value: {midpointValue}")
+        if cmp(midpointValue, elem) == 0:
+            return midpoint
+        elif cmp(midpointValue, elem) == 1:
+            endIndex = midpoint - 1
+        else:
+            startIndex = midpoint + 1
+    return -1
+
     """
     This method search for elem in lst using binary search.
 
@@ -108,6 +139,15 @@ def test1_5():
 class PrefixSearcher():
 
     def __init__(self, document, k):
+        self.document = document
+        self.maxStringLength = k
+        self.substrings = []
+        for j in range(self.maxStringLength, 0, -1):
+            #print(f"J index{j} and K {self.maxStringLength}")
+            for i in range(0,len(document)):
+                self.substrings.append(document[i:i+j])
+        #print(f"Unsorted Strings: {self.substrings}")
+
         """
         Initializes a prefix searcher using a document and a maximum
         search string length k.
@@ -115,6 +155,29 @@ class PrefixSearcher():
         pass
 
     def search(self, q):
+        substringCmp = lambda x,y: 0 if (x[:len(q)] == y[:len(q)]) else (-1 if(x[:len(q)] < y[:len(q)]) else 1)
+        mysort(self.substrings, substringCmp)
+        #print(f"Hopefully Sorted Strings: {self.substrings}")
+        startIndex = 0
+        endIndex = len(self.substrings)-1
+        #print(lst)
+        #print(f"Looking for this element {elem}")
+
+        while startIndex <= endIndex:
+            midpoint = startIndex + (endIndex-startIndex)//2
+            midpointValue = self.substrings[midpoint]
+            #print(f"Midpoint: {midpoint}")
+            #print(f"Midpoint Value: {midpointValue}")
+            if len(q) > self.maxStringLength:
+                raise Exception('q is longer than n')
+            if substringCmp(midpointValue, q) == 0:
+                return True
+            elif substringCmp(midpointValue, q) == 1:
+                endIndex = midpoint - 1
+            else:
+                startIndex = midpoint + 1
+        return False
+
         """
         Return true if the document contains search string q (of
 
@@ -163,6 +226,15 @@ class SuffixArray():
         """
         Creates a suffix array for document (a string).
         """
+        self.document = document
+        self.suffixes = [self.document[i:] for i in range(len(self.document))]
+        self.suffixArray = sorted([self.document[i:] for i in range(len(self.document))])
+        #print(self.document)
+        for i in range(0, len(self.suffixes)):
+            for j in range(0, len(self.suffixArray)):
+                if self.suffixes[i] == self.suffixArray[j]:
+                    self.suffixArray[j] = self.suffixes.index(self.suffixes[i])
+        #print(self.suffixArray)
         pass
 
 
@@ -170,12 +242,56 @@ class SuffixArray():
         """
         Returns all the positions of searchstr in the documented indexed by the suffix array.
         """
-        pass
+        startIndex = 0
+        endIndex = len(self.suffixArray)-1
+        #print(lst)
+        #print(f"Looking for this element {elem}")
+        #print(f"Suffixes Value: {self.document[self.suffixArray[427]:self.suffixArray[427]+len(searchstr)]}")
+
+        while startIndex <= endIndex:
+            midpoint = startIndex + (endIndex-startIndex)//2
+            midpointValue = self.suffixArray[midpoint]
+            #print(f"Midpoint Value: {self.suffixArray[midpoint]}")
+            #print(f"Search String: {searchstr[0]}")
+            #print(f"Suffixes Value: {self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)]}")
+            if self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)] == searchstr:
+                #print(f"!FOUND SEARCH STR!: {self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)]}")
+                if self.document[self.suffixArray[midpoint-1]:self.suffixArray[midpoint-1]+len(searchstr)] == searchstr:
+                    return [midpoint-1]
+                else:
+                    return [midpoint]
+            elif searchstr < self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)]:
+                #print("Ignoring right side")
+                endIndex = midpoint - 1
+            else:
+                startIndex = midpoint + 1
+                #print("Ignoring left side")
+        return -1
 
     def contains(self, searchstr: str):
         """
         Returns true of searchstr is coontained in document.
         """
+        startIndex = 0
+        endIndex = len(self.suffixArray)-1
+        #print(f"Suffixes Value: {self.suffixes[34]}")
+
+        while startIndex <= endIndex:
+            midpoint = startIndex + (endIndex-startIndex)//2
+            midpointValue = self.suffixArray[midpoint]
+            #print(f"Midpoint Value: {self.suffixArray[midpoint]}")
+            #print(f"Search String: {searchstr[0]}")
+            #print(f"Suffixes Value: {self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)]}")
+            if self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)] == searchstr:
+                #print(f"!FOUND SEARCH STR!: {self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)]}")
+                return True
+            elif searchstr < self.document[self.suffixArray[midpoint]:self.suffixArray[midpoint]+len(searchstr)]:
+                #print("Ignoring right side")
+                endIndex = midpoint - 1
+            else:
+                startIndex = midpoint + 1
+                #print("Ignoring left side")
+        return False
         pass
 
 # 40 Points
