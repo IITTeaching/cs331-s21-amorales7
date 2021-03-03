@@ -74,13 +74,13 @@ class ArrayList:
     def __init__(self, n=0):
         self.data = ConstrainedList(n) # don't change this line!
         self.len = n # the attribute self.len should be record the length of the list (do not rename!)
-
+        self.num = -1 # for iteration
     ### subscript-based access ###
 
     def _normalize_idx(self, idx):
         nidx = idx
         if nidx < 0:
-            nidx += len(self.data)
+            nidx += self.len
             if nidx < 0:
                 nidx = 0
         return nidx
@@ -135,7 +135,7 @@ class ArrayList:
         """Appends value to the end of this list."""
         ### BEGIN SOLUTION
         if len(self.data) <= self.len:
-            newa = ConstrainedList(2 * len(self.data)+1)
+            newa = ConstrainedList(2 * self.len+1)
             #print(len(newa))
             for i in range(0, self.len):
                 newa[i] = self.data[i]
@@ -273,6 +273,14 @@ class ArrayList:
         specified, search through the end of the list for value. If value
         is not in the list, raise a ValueError."""
         ### BEGIN SOLUTION
+        if j == None:
+            j = len(self.data)
+        elif j < 0:
+            j = len(self.data)+j
+        for index in range(i, j):
+            if self.data[index] == value:
+                return index
+        raise ValueError
         ### END SOLUTION
 
     def count(self, value):
@@ -293,35 +301,67 @@ class ArrayList:
         instance that contains the values in this list followed by those
         of other."""
         ### BEGIN SOLUTION
+        newa = ArrayList(self.len+other.len)
+        for i in range(0, len(newa)):
+            if i < len(self.data):
+                newa[i] = self.data[i]
+            else:
+                newa[i] = other.data[i-len(self.data)]
+        return newa
         ### END SOLUTION
 
     def clear(self):
         self.data = ConstrainedList() # don't change this!
+        self.len = 0
 
     def copy(self):
         """Returns a new ArrayList instance (with a separate data store), that
         contains the same values as this list."""
         ### BEGIN SOLUTION
+        copya = ArrayList(self.len)
+        for i in range(0, len(copya)):
+                copya[i] = self.data[i]
+        return copya
         ### END SOLUTION
 
     def extend(self, other):
         """Adds all elements, in order, from other --- an Iterable --- to this list."""
         ### BEGIN SOLUTION
+        newa = ConstrainedList(self.len+len(list(other)))
+        for i in range(0, len(newa)):
+            if i < self.len:
+                newa[i] = self.data[i]
+            else:
+                newa[i] = other[i-self.len]
+        self.data = newa
+        self.len = len(newa)
         ### END SOLUTION
 
 
     ### iteration ###
-
     def __iter__(self):
         """Supports iteration (via `iter(self)`)"""
         ### BEGIN SOLUTION
+        self.num = -1
+        print("Just want to see when this prints")
+        return self
         ### END SOLUTION
+
+    def __next__(self):
+        if self.num < self.len-1:
+            self.num += 1
+            print(f"data index {self.num}")
+            print(f"data being returned {self.data[self.num]}")
+            return self.data[self.num]
+        else:
+            #self.num = -1
+            raise StopIteration
+
 
 ################################################################################
 # TEST CASES
 def arrayListToList(a):
     return list(a.data._as_list()[:len(a)])
-
 
 ########################################
 # 15 points
@@ -400,19 +440,14 @@ def test_case_3():
     tc = TestCase()
     lst = ArrayList()
     data = []
-    #print(data)
-    #print(lst)
 
     for _ in range(100):
         to_add = random.randrange(1000)
         data.append(to_add)
         lst.append(to_add)
 
-    #print(data)
-    #print(lst)
-
     tc.assertIsInstance(lst.data, ConstrainedList)
-    #tc.assertEqual(data, arrayListToList(lst))
+    tc.assertEqual(data, arrayListToList(lst))
 
     for _ in range(100):
         to_ins = random.randrange(1000)
@@ -420,31 +455,20 @@ def test_case_3():
         data.insert(ins_idx, to_ins)
         lst.insert(ins_idx, to_ins)
 
-    #print(f"This is the length of the data after 100 inserts: {len(data)}")
-    #print(data)
-    #print(lst)
-    #tc.assertEqual(data, arrayListToList(lst))
+    tc.assertEqual(data, arrayListToList(lst))
 
     for _ in range(100):
         pop_idx = random.randrange(len(data))
         tc.assertEqual(data.pop(pop_idx), lst.pop(pop_idx))
 
-    #print(f"This is the length of the data after 100 pops: {len(data)}")
-    #print(data)
-    #print(lst)
-
-    #tc.assertEqual(data, arrayListToList(lst))
+    tc.assertEqual(data, arrayListToList(lst))
 
     for _ in range(25):
         to_rem = data[random.randrange(len(data))]
         data.remove(to_rem)
         lst.remove(to_rem)
 
-    #tc.assertEqual(data, arrayListToList(lst))
-
-    #print(f"This is the length of the data after 25 elements removed: {len(data)}")
-    #print(data)
-    #print(lst)
+    tc.assertEqual(data, arrayListToList(lst))
 
     with tc.assertRaises(ValueError):
         lst.remove(9999)
@@ -576,6 +600,8 @@ def test_case_7():
     for x in data:
         tc.assertEqual(next(it1), x)
         tc.assertEqual(next(it2), x)
+        #print(f"next iter2 item {next(it2)}")
+        print(f"x in the data {x}")
     suc()
 
 ########################################
@@ -591,7 +617,7 @@ def test_log(s):
 ########################################
 # All tests
 def main():
-    #test_case_1()
+    test_case_1()
     test_case_2()
     test_case_3()
     test_case_4()
