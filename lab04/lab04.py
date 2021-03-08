@@ -72,7 +72,6 @@ class ArrayList:
     def __init__(self, n=0):
         self.data = ConstrainedList(n) # don't change this line!
         self.len = n # the attribute self.len should be record the length of the list (do not rename!)
-        self.num = -1 # for iteration
     ### subscript-based access ###
 
     def _normalize_idx(self, idx):
@@ -340,21 +339,27 @@ class ArrayList:
     def __iter__(self):
         """Supports iteration (via `iter(self)`)"""
         ### BEGIN SOLUTION
-        self.num = -1
-        print("Just want to see when this prints")
-        return self
+        class Iterator:
+            def __init__(self, data):
+                self.idx = -1
+                self.data = data
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                while self.idx < len(self.data)-1:
+                    self.idx += 1
+                    return self.data[self.idx]
+                raise StopIteration
+        return Iterator(self.data)
+        #self.num = 0
+        #print(self.num)
+        #while self.num < self.len:
+            #yield self.data[self.num]
+            #self.num+=1
+            #print(self.num)
         ### END SOLUTION
-
-    def __next__(self):
-        if self.num < self.len-1:
-            self.num += 1
-            print(f"data index {self.num}")
-            print(f"data being returned {self.data[self.num]}")
-            return self.data[self.num]
-        else:
-            #self.num = -1
-            raise StopIteration
-
 
 ################################################################################
 # TEST CASES
@@ -598,8 +603,6 @@ def test_case_7():
     for x in data:
         tc.assertEqual(next(it1), x)
         tc.assertEqual(next(it2), x)
-        #print(f"next iter2 item {next(it2)}")
-        print(f"x in the data {x}")
     suc()
 
 ########################################
