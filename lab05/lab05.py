@@ -279,7 +279,7 @@ class LinkedList:
         ### BEGIN SOLUTION
         min = self.get_cell(0)
         n = self.head.next
-        for i in range(1, self.length):
+        for i in range(0, self.length):
             if n.val < min.val:
                 min = n
             n = n.next
@@ -291,7 +291,7 @@ class LinkedList:
         ### BEGIN SOLUTION
         max = self.get_cell(0)
         n = self.head.next
-        for i in range(1, self.length):
+        for i in range(0, self.length):
             if n.val > max.val:
                 max = n
             n = n.next
@@ -389,6 +389,12 @@ class LinkedList:
         E.g., for [1,2,3] you shoudl return [3,2,1].
         """
         ### BEGIN SOLUTION
+        n = self.get_cell(self.length-1)
+        copyn = LinkedList()
+        for i in range(0, self.length):
+            copyn.append(n.val)
+            n = n.prior
+        return copyn
         ### END SOLUTION
 
 
