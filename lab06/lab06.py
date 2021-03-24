@@ -51,6 +51,24 @@ def check_delimiters(expr):
     delim_closers = '})]>'
 
     ### BEGIN SOLUTION
+    s = Stack()
+    for c in expr:
+        if c in delim_openers:
+            s.push(c)
+        elif c in delim_closers:
+            try:
+                if s.peek() == '{' and c != '}':
+                    return False
+                if s.peek() == '(' and c != ')':
+                    return False
+                if s.peek() == '[' and c != ']':
+                    return False
+                if s.peek() == '<' and c != '>':
+                    return False
+                s.pop()
+            except:
+                return False
+    return s.empty()
     ### END SOLUTION
 
 ################################################################################
@@ -121,6 +139,55 @@ def infix_to_postfix(expr):
     postfix = []
     toks = expr.split()
     ### BEGIN SOLUTION
+    #print("-------------------NEW TEST CASE ------------------------------")
+    for t in toks:
+        if t == '(':
+            ops.push(t)
+            #print(f"Current token is a left parenthesis {t}")
+        elif t == ')':
+            #print(f"Current token is a right parenthesis {t}")
+            #print(f"This is the pre-postfix: {postfix}")
+            #print(f"This is how the stack looks like BEFORE popping until finding a left parenthesis: {ops}")
+            while ops.peek() != '(':
+                postfix.append(ops.pop())
+                #print(f"This is how the stack looks like after popping until finding a left parenthesis: {ops}")
+                #print(f"This is the postfix: {postfix}")
+            ops.pop()
+        elif t in prec:
+            #print(f"Current token is an operand {t}")
+            if ops.empty() or ops.peek() == '(':
+                ops.push(t)
+                #print(f"This is the postfix: {postfix}")
+                #print(f"Stack is empty or parenthesis on top of stack {t} this is how the stack looks like {ops}")
+            elif ops.peek() == None:
+                ops.push(t)
+                #print(f"This is the postfix: {postfix}")
+                #print(f"Top of stack contains a None value {t} this is how the stack looks like {ops}")
+            elif prec[t] > prec[ops.peek()]:
+                ops.push(t)
+                #print(f"This is the postfix: {postfix}")
+                #print(f"Incoming operand has greater precedence than top of stack {t}")
+            elif prec[t] == prec[ops.peek()]:
+                postfix.append(ops.pop())
+                ops.push(t)
+                #print(f"This is the postfix: {postfix}")
+                #print(f"Incoming operand has equal an precedence with the top of stack {t}")
+            elif prec[t] < prec[ops.peek()]:
+                #print(f"Incoming operand has a smaller precedence than the top of stack {t} and this is the top of the stack {ops.peek()}")
+                postfix.append(ops.pop())
+                ops.push(t)
+                #print(f"This is the postfix: {postfix}")
+        else:
+            #print(f"Current token should be a number {t}")
+            postfix.append(t)
+
+    #print(f"This is how the stack looks like {ops}")
+    #print(f"This is the semi-final postfix: {postfix}")
+    for elem in ops:
+        #print(f"These are the elements in the ops stack: {elem}")
+        if elem != '(':
+            postfix.append(elem)
+    #print(f"This is the final postfix: {postfix}")
     ### END SOLUTION
     return ' '.join(postfix)
 
@@ -166,19 +233,50 @@ class Queue:
 
     def enqueue(self, val):
         ### BEGIN SOLUTION
+        #print(f"The length of data {len(self.data)}")
+        #print(self.data)
+        if None not in self.data:
+            raise RuntimeError
+        if self.head == -1:
+            self.head = val
+        self.tail = val
+        for i in range(len(self.data)):
+            if self.data[i] == None:
+                self.data[i] = val
+                break
         ### END SOLUTION
 
     def dequeue(self):
         ### BEGIN SOLUTION
+        if not self.data:
+            raise RuntimeError
+        poppedItem = self.data[0]
+        for i in range(len(self.data)):
+            if i >= len(self.data)-1:
+                self.data[i] = None
+            else:
+                self.data[i] = self.data[i+1]
+        self.head = self.data[0]
+        #print(self.data)
+        return poppedItem
         ### END SOLUTION
 
     def resize(self, newsize):
         assert(len(self.data) < newsize)
         ### BEGIN SOLUTION
+        increase = newsize - len(self.data)
+        for i in range(increase):
+            self.data.append(None)
         ### END SOLUTION
 
     def empty(self):
         ### BEGIN SOLUTION
+        for i in range(len(self.data)):
+            if self.data[i] != None:
+                return False
+        self.head = -1
+        self.tail = -1
+        return True
         ### END SOLUTION
 
     def __bool__(self):
@@ -194,6 +292,10 @@ class Queue:
 
     def __iter__(self):
         ### BEGIN SOLUTION
+        i = 0
+        while i < len(self.data):
+            yield self.data[i]
+            i+= 1
         ### END SOLUTION
 
 ################################################################################
@@ -228,6 +330,7 @@ def test_queue_implementation_2():
 	    q.enqueue(i)
 
 	tc.assertEqual(q.data.count(None), 4)
+
 
 	for i in range(5):
 	    q.dequeue()
