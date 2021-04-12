@@ -22,12 +22,50 @@ class Heap:
     def _right(idx):
         return idx*2+2
 
+    def pos_exists(self, n):
+        return n < len(self.data)
+
+    def has_parent(self, n):
+        return Heap._parent(n) >= 0
+
+    def has_left_child(self, n):
+        return Heap._left(n) < len(self.data)
+
+    def has_right_child(self, n):
+        return Heap._right(n) < len(self.data)
+
+    def switch_nodes(self, parent, child):
+        parentval = self.data[parent]
+        childval = self.data[child]
+        self.data[parent] = childval
+        self.data[child] = parentval
+
     def heapify(self, idx=0):
         ### BEGIN SOLUTION
+        if idx == 0:
+            index = 0
+            while (self.has_left_child(index)):
+                keyChildIndex = Heap._left(index)
+                if self.has_right_child(index) and self.key(self.data[Heap._right(index)]) > self.key(self.data[Heap._left(index)]):
+                    keyChildIndex = Heap._right(index)
+
+                if self.key(self.data[index]) > self.key(self.data[keyChildIndex]):
+                    break
+                else:
+                    self.switch_nodes(index, keyChildIndex)
+                index = keyChildIndex
+        else:
+            index = len(self.data) - 1
+            while (self.has_parent(index) and self.key(self.data[Heap._parent(index)]) < self.key(self.data[index])):
+                self.switch_nodes(Heap._parent(index), index)
+                index = Heap._parent(index)
+        #print(f"Heapified List: {self.data}")
         ### END SOLUTION
 
     def add(self, x):
         ### BEGIN SOLUTION
+        self.data.append(x)
+        self.heapify(len(self.data) - 1)
         ### END SOLUTION
 
     def peek(self):
@@ -130,6 +168,40 @@ def test_key_heap_5():
 ################################################################################
 def running_medians(iterable):
     ### BEGIN SOLUTION
+    minHeap = Heap(lambda x:-x)
+    maxHeap = Heap()
+    medians = []
+    for i, x in enumerate(iterable):
+        #print("***************NEW LOOP*******************")
+        if len(medians)<=0:
+            medians.append(x)
+
+        if x > medians[-1]:
+            minHeap.add(x)
+        else:
+            maxHeap.add(x)
+
+        if len(maxHeap) == len(minHeap):
+            medians.append((maxHeap.peek()+minHeap.peek())/2)
+        elif len(maxHeap) == len(minHeap)+1:
+            medians.append(maxHeap.peek())
+        elif len(minHeap) == len(maxHeap)+1:
+            medians.append(minHeap.peek())
+        elif len(minHeap) == len(maxHeap)+2:
+            maxHeap.add(minHeap.pop())
+            medians.append((maxHeap.peek()+minHeap.peek())/2)
+        elif len(maxHeap) == len(minHeap)+2:
+            minHeap.add(maxHeap.pop())
+            medians.append((maxHeap.peek()+minHeap.peek())/2)
+
+
+        #print(f"This is the min Heap: {minHeap}")
+        #print(f"This is the max Heap: {maxHeap}")
+
+        #medians.append((minHeap.peek() + maxHeap.peek()) / 2)
+    del medians[0]
+    return medians
+    pass
     ### END SOLUTION
 
 ################################################################################
@@ -150,7 +222,7 @@ def running_medians_naive(iterable):
 # (13 points)
 def test_median_1():
     tc = TestCase()
-    tc.assertEqual([3, 2.0, 3, 6.0, 9], running_medians([3, 1, 9, 25, 12]))
+    tc.assertEqual([3, 2.0, 3, 6.0, 9], running_medians([3, 1, 9, 25, 12])) #1,3,9,12,25
 
 # (13 points)
 def test_median_2():
@@ -174,6 +246,22 @@ def test_median_3():
 ################################################################################
 def topk(items, k, keyf):
     ### BEGIN SOLUTION
+    revkey = lambda x: keyf(x) * -1
+    minHeap = Heap(revkey)
+    topk = []
+    for x in items:
+        if len(minHeap) < k:
+            minHeap.add(x)
+
+        if x[1] > minHeap.peek()[1]:
+            minHeap.pop()
+            minHeap.add(x)
+        #print(x[1], keyf)
+
+    for i in range(len(minHeap)):
+        topk.append(minHeap.pop())
+    #print(topk[::-1])
+    return topk[::-1]
     ### END SOLUTION
 
 ################################################################################
