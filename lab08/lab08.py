@@ -71,6 +71,7 @@ class Heap:
     def peek(self):
         return self.data[0]
 
+
     def pop(self):
         ret = self.data[0]
         self.data[0] = self.data[len(self.data)-1]

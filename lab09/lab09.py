@@ -53,6 +53,10 @@ class HBStree:
         KeyError, if key does not exist.
         """
         # BEGIN SOLUTION
+        if key in self.root_versions[-1]:
+            return key
+        else:
+            raise KeyError
         # END SOLUTION
 
     def __contains__(self, el):
@@ -60,6 +64,16 @@ class HBStree:
         Return True if el exists in the current version of the tree.
         """
         # BEGIN SOLUTION
+        def rec_contains(r,val):
+            if r:
+                if(r.val == val):
+                    return True
+                elif(r.val > val):
+                    return rec_contains(r.left,val)
+                else:
+                    return rec_contains(r.right,val)
+        return rec_contains(self.root_versions[-1], el)
+
         # END SOLUTION
 
     def insert(self,key):
@@ -68,12 +82,92 @@ class HBStree:
         tree. If key already exists, then do nothing and refrain
         from creating a new version.
         """
+        #print("*****************************************NEW TEST CASE******************************************")
         # BEGIN SOLUTION
+        def rec_add(r,key):
+            if(r.val > key):
+                if(r.left):
+                    #print(f"~~~~~~~This is r.left.val {r.left.val} and the key {key}")
+                    if (r.left.val > key):
+                        #print(f"!!!!!!!This is r.left.val {r.left.val} this is the key {key} and this is r.left.right {r.left.right}")
+                        return self.INode(r.left.val, rec_add(r.left,key), r.left.right)
+                    else:
+                        #print(f"@@@@@@@This is r.left.val {r.left.val} this is r.right {r.left} and this is the key {key}")
+                        return self.INode(r.left.val, r.left.left, rec_add(r.left,key))
+                else:
+                    return self.INode(key, None, None)
+            elif(r.val < key):
+                if(r.right):
+                    #print(f"~~~~~~~This is r.right.val {r.right.val} and the key {key}")
+                    if (r.right.val < key):
+                        #print(f"#######This is r.right.val {r.right.val} this is r.right.left {r.right.left} and this is the key {key}")
+                        return self.INode(r.right.val, r.right.left, rec_add(r.right,key))
+                    else:
+                        #print(f"$$$$$$$This is r.right.val {r.right.val} this is the key {key} and this is r.left.right {r} ")
+                        return self.INode(r.right.val, rec_add(r.right,key), r.right.right)
+                else:
+                    #print("Created a new Node")
+                    return self.INode(key, None, None)
+        prevRoot = self.root_versions[self.num_versions()-1]
+        if self.num_versions() <= 1:
+            newRoot = self.INode(key, None, None)
+            return self.root_versions.append(newRoot)
+        elif key < prevRoot.val and key not in self:
+            #print(f"<<<<<This is the number of versions: {key}")
+            newRoot = self.INode(prevRoot.val, rec_add(prevRoot, key), prevRoot.right)
+            return self.root_versions.append(newRoot)
+        elif key > prevRoot.val and key not in self:
+            #print(f">>>>>This is the number of versions: {key}")
+            newRoot = self.INode(prevRoot.val, prevRoot.left, rec_add(prevRoot, key))
+            return self.root_versions.append(newRoot)
+        else:
+            return
         # END SOLUTION
+    def tmax(self):
+        if not self.right:
+            return self.val
+        return self.right.tmax()
 
     def delete(self,key):
         """Delete key from the tree, creating a new version of the tree. If key does not exist in the current version of the tree, then do nothing and refrain from creating a new version."""
         # BEGIN SOLUTION
+        def rec_del(parent,isleft,t,val):
+            if t.val > val:
+                return self.INode(t.val, rec_del(t, True, t.left, val), t.right)
+            elif t.val < val:
+                return self.INode(t.val, t.left, rec_del(t, False, t.right,val))
+            else:
+                if t.left and t.right: # node has two children, replace with largest value in the left subtree and then delete that one
+                    replaceval = t.left.tmax()
+                    return self.INode(replaceval, rec_del(t, True, t.left, replaceval), t.right)
+                elif t.left: # replace node with its only child (the left one)
+                    return self.INode(t.left.val, t.left.left, t.left.right)
+                elif t.right: # replace node with its only child (the right one)
+                    return self.INode(t.right.val, t.right.left, t.right.right)
+                else:
+                    if parent:
+                        if isleft:
+                            return None
+                        else:
+                            return None
+        prevRoot = self.root_versions[self.num_versions()-1]
+        if (key in self):
+            # if (key < prevRoot.val):
+            #     newRoot = prevRoot
+            #     #newRoot = self.INode(prevRoot.val, rec_del(None,None,self.root_versions[-1], key),prevRoot.right)
+            #     print(f"New Root left: {rec_del(None,None,self.root_versions[-1], key)}")
+            #     return self.root_versions.append(rec_del(None,None,self.root_versions[-1], key))
+            # elif (key > prevRoot.val):
+            #     newRoot = self.INode(prevRoot.val,prevRoot.left, rec_del(None,None,self.root_versions[-1], key))
+            #     print(f"New Root right: {newRoot}")
+            #     return self.root_versions.append(rec_del(None,None,self.root_versions[-1], key))
+            # else:
+            #     newRoot = self.INode(rec_del(None,None,self.root_versions[-1], key),prevRoot.left, prevRoot.right)
+            #     print(f"New Root Root: {newRoot}")
+            return self.root_versions.append(rec_del(None,None,self.root_versions[-1], key))
+        else:
+            #print("key not in tree")
+            return
         # END SOLUTION
 
     @staticmethod
@@ -145,6 +239,14 @@ class HBStree:
         if timetravel < 0 or timetravel >= len(self.root_versions):
             raise IndexError(f"valid versions for time travel are 0 to {len(self.root_versions) -1}, but was {timetravel}")
         # BEGIN SOLUTION
+        #print(f"The index of the root version: {[(len(self.root_versions)-1)-timetravel]}")
+        def rec_iter(r):
+            if r:
+                yield from rec_iter(r.left)
+                yield r.val
+                yield from rec_iter(r.right)
+
+        yield from rec_iter(self.root_versions[(len(self.root_versions)-1)-timetravel])
         # END SOLUTION
 
     @staticmethod
@@ -209,11 +311,15 @@ def check_inserted(vals):
     print(f"test inserting {vals}")
 
     for v in vals:
+        #print(f"Value being inserted: {v}")
         t.insert(v)
+        #print(f"Most recent tree version: {t.root_versions[-1]}")
 
-    for i in range(0,len(vals) + 1):
+    for i in range(0,len(vals)+1):
         sortel = [ v for v in t.version_iter(len(vals) - i) ]
         sortval = sorted(vals[0:i])
+        #print(f"Sorted Elements: {sortel} and this is i: {i}")
+        #print(f"Sorted Values: {sortval}")
         for j in range(0,i):
             tc.assertEqual(sortval[j],sortel[j])
     return t
@@ -261,6 +367,8 @@ def insert_check_delete(vals):
         del todo[0]
         sortel = [ v for v in t.version_iter() ]
         sortval = sorted(todo)
+        #print(f"Sorted Elements: {sortel} and this is i: {i}")
+        #print(f"Sorted Values: {sortval}")
         for j in range(0,len(sortval)):
             tc.assertEqual(sortval[j],sortel[j])
 
@@ -286,7 +394,9 @@ def test_corner_cases():
     for i in range(0,10,2):
         for j in range(0,3):
             t.insert(i)
+            #print(f"This is the element being inserted: {i}")
 
+    #print(f"This is the tree after multiple insertions: {t}")
     tc.assertEqual(t.num_versions(), len(range(0,10,2)) + 1)
 
     t = HBStree()
