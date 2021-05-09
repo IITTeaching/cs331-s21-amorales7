@@ -6,19 +6,96 @@ def quicksort(lst,pivot_fn):
 
 def qsort(lst,low,high,pivot_fn):
     ### BEGIN SOLUTION
+    #p = pivot_fn(lst, low, high)
+    if low < high:
+        pivot = pivot_fn(lst,low,high)
+        qsort(lst, low, pivot, pivot_fn)
+        qsort(lst,pivot+1, high, pivot_fn)
     ### END SOLUTION
+
+def median(low, middle, high):
+    order = [low, middle, high]
+    sortedOrder = sorted(order)
+    #print(f"This should be the median: {sortedOrder[1]} of this list: {sortedOrder}")
+    return sortedOrder[1]
+
 
 def pivot_first(lst,low,high):
     ### BEGIN SOLUTION
+    i = low -1
+    j = high + 1
+    pivot = lst[low]
+    #print(f"This is the pivot: {pivot} and this is the index: {low} and the list: {lst} ")
+    while True:
+        #i+=1
+        while True:
+            i = i + 1
+            if lst[i] >= pivot:
+                break
+
+        #j += -1
+        while True:
+            j = j - 1
+            if lst[j] <= pivot:
+                break
+
+        if i >= j:
+            return j
+        lst[i], lst[j] = lst[j], lst[i]
     ### END SOLUTION
 
 def pivot_random(lst,low,high):
     ### BEGIN SOLUTION
+    i = low -1
+    j = high + 1
+    randomIndex = random.randrange(0, len(lst)-1)
+    pivot = lst[randomIndex]
+    #print(f"This is the pivot: {pivot} and this is the index: {low} and the list: {lst} ")
+    while True:
+        #i+=1
+        while True:
+            i = i + 1
+            if lst[i] >= pivot:
+                break
+
+        #j += -1
+        while True:
+            j = j - 1
+            if lst[j] <= pivot:
+                break
+
+        if i >= j:
+            return j
+        lst[i], lst[j] = lst[j], lst[i]
     ### END SOLUTION
 
 def pivot_median_of_three(lst,low,high):
     ### BEGIN SOLUTION
+    i = low -1
+    j = high + 1
+    medianIndex = median(lst[low], lst[(low + high) // 2], lst[high])
+    #print(f"This is the median Index: {medianIndex}")
+    pivot = medianIndex
+    #print(f"This is the pivot: {pivot} and this is the index: {low} and the list: {lst} ")
+    while True:
+        #i+=1
+        while True:
+            i = i + 1
+            if lst[i] >= pivot:
+                break
+
+        #j += -1
+        while True:
+            j = j - 1
+            if lst[j] <= pivot:
+                break
+
+        if i >= j:
+            return j
+        lst[i], lst[j] = lst[j], lst[i]
     ### END SOLUTION
+
+
 
 ################################################################################
 # TEST CASES
